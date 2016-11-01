@@ -16,10 +16,10 @@
         <!--android:layout_margin="@dimen/text_margin"-->
         <!--android:text="@string/large_text" />-->
 
-
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:stretchColumns="2">
 
         <TableRow
             android:layout_width="match_parent"
@@ -28,27 +28,37 @@
             android:paddingBottom="5dp"
             android:background="@drawable/cell_shape">
 
+            <!--<android.support.design.widget.FloatingActionButton-->
+                <!--android:id="@+id/fab"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--app:layout_anchor="@id/app_bar"-->
+                <!--app:layout_anchorGravity="bottom|end"-->
+                <!--app:srcCompat="@android:drawable/ic_media_play" />-->
+
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="We don't talk anymore"
+                android:layout_column="2"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:background="@drawable/cell_shape">
+            android:background="@drawable/cell_shape"
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="Treat you better"
+                android:layout_column="2"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
         </TableRow>

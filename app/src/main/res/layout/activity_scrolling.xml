@@ -30,6 +30,13 @@
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+            <TextView
+                android:id="@+id/activityName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Driving"
+                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
@@ -37,11 +44,12 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="63dp"
+        android:layout_height="55dp"
         android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        app:layout_anchor="@+id/app_bar"
+        app:layout_anchorGravity="bottom|right"
+        app:srcCompat="@android:drawable/ic_media_play"
+        android:layout_gravity="center_vertical|left" />
 
 </android.support.design.widget.CoordinatorLayout>
