@@ -19,7 +19,8 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="2">
+        android:stretchColumns="2"
+        android:id="@+id/song_list">
 
         <TableRow
             android:layout_width="match_parent"
@@ -41,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="We don't talk anymore"
-                android:layout_column="2"
+                android:layout_column="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
         </TableRow>
@@ -58,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Treat you better"
-                android:layout_column="2"
+                android:layout_column="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
         </TableRow>
