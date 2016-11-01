@@ -24,30 +24,30 @@
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            >
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="@drawable/cell_shape">
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/cell_shape"
-            android:padding="5dp"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-           >
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="@drawable/cell_shape">
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/cell_shape"
-                android:padding="5dp"
                 android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
 
