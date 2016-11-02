@@ -22,47 +22,5 @@
         android:stretchColumns="2"
         android:id="@+id/song_list">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:background="@drawable/cell_shape">
-
-            <!--<android.support.design.widget.FloatingActionButton-->
-                <!--android:id="@+id/fab"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--app:layout_anchor="@id/app_bar"-->
-                <!--app:layout_anchorGravity="bottom|end"-->
-                <!--app:srcCompat="@android:drawable/ic_media_play" />-->
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="We don't talk anymore"
-                android:layout_column="1"
-                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:background="@drawable/cell_shape"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Treat you better"
-                android:layout_column="1"
-                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
-
-        </TableRow>
-
     </TableLayout>
 </android.support.v4.widget.NestedScrollView>

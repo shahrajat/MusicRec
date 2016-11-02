@@ -1,11 +1,16 @@
 package com.shahrajat.musicrec;
 
+import android.app.Activity;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.support.v7.widget.Toolbar;
+import android.util.Xml;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -18,7 +23,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScrollingActivity extends AppCompatActivity {
 
@@ -33,7 +43,7 @@ public class ScrollingActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Playing Song now...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Playing Song in background...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -65,10 +75,37 @@ public class ScrollingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // Adds all the songs present in xml/songs.xml to the table
+    private List<Song> getEventsFromAnXML(Activity activity)
+            throws XmlPullParserException, IOException
+    {
+        List<Song> songs = new ArrayList<Song>();
 
+        StringBuffer stringBuffer = new StringBuffer();
+        Resources res = activity.getResources();
+        XmlResourceParser xpp = res.getXml(R.xml.songs);
+        xpp.next();
+
+        int eventType = xpp.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT)
+        {
+            if(eventType == XmlPullParser.START_TAG && xpp.getName().equals("item"))
+            {
+                Song newSong = new Song();
+                xpp.next(); xpp.next();
+                newSong.name = xpp.getText();
+                xpp.next(); xpp.next();xpp.next();
+                newSong.author = xpp.getText();
+                xpp.next();xpp.next();xpp.next();
+                newSong.year = xpp.getText();
+                xpp.next();xpp.next();xpp.next();
+                newSong.time = xpp.getText();
+                songs.add(newSong);
+            }
+            eventType = xpp.next();
+        }
+        return songs;
+    }
     /*
-
     <TextView
                 android:id="@+id/textView1"
                 android:layout_width="match_parent"
@@ -76,65 +113,57 @@ public class ScrollingActivity extends AppCompatActivity {
                 android:text="We don't talk anymore"
                 android:layout_column="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
+                <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="@drawable/cell_shape">
+
      */
-
+    // Adds all the songs present in xml/songs.xml to the table
     private void populateSongList() {
-        TableLayout stk = (TableLayout) findViewById(R.id.song_list);
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
-        TextView errorBox = (TextView) findViewById(R.id.activityName);
-        // All static variables
-        //final String URL = "http://api.androidhive.info/pizza/?format=xml";
-        // XML node keys
-        final String KEY_ITEM = "item"; // parent node
-        final String KEY_NAME = "name";
-        final String KEY_COST = "cost";
-        final String KEY_DESC = "description";
 
-        XMLParser parser = new XMLParser();
-        String xml = parser.getXmlFromUrl(errorBox); // getting XML
-        Document doc = parser.getDomElement(xml); // getting DOM element
-        if(doc == null) {
+        try {
+            List<Song> songs = getEventsFromAnXML(this);
+            for(Song s: songs) {
+                TableRow tbrow = new TableRow(this);
+                tbrow.setPadding(0, 50, 0, 50);
+                tbrow.setBackgroundResource(R.drawable.cell_shape);
 
-            return;
+                TextView tv1 = new TextView(this);
+                tv1.setText(s.name);
+                tv1.setTextColor(Color.BLACK);
+                tv1.setGravity(Gravity.LEFT);
+                tbrow.addView(tv1);
+
+                TextView t2v = new TextView(this);
+                t2v.setText(s.author);
+                t2v.setTextColor(Color.BLACK);
+                tbrow.addView(t2v);
+
+                TextView t3v = new TextView(this);
+                t3v.setText(s.year);
+                t3v.setTextColor(Color.BLACK);
+                tbrow.addView(t3v);
+
+                TextView t4v = new TextView(this);
+                t4v.setText(s.time);
+                t4v.setTextColor(Color.BLACK);
+                t4v.setGravity(Gravity.RIGHT);
+                tbrow.addView(t4v);
+                songsTbl.addView(tbrow);
+
+            }
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        NodeList nl = doc.getElementsByTagName(KEY_ITEM);
 
-        // looping through all item nodes <item>
-        for (int i = 0; i < nl.getLength(); i++) {
-            Element e = (Element) nl.item(i);
-            String name = parser.getValue(e, KEY_NAME); // name child value
-            String cost = parser.getValue(e, KEY_COST); // cost child value
-            String description = parser.getValue(e, KEY_DESC); // description child value
-
-            TableRow tbrow = new TableRow(this);
-            TextView t2v = new TextView(this);
-            t2v.setText("We don't talk anymore");
-            t2v.setTextColor(Color.BLACK);
-            t2v.setGravity(Gravity.CENTER);
-            tbrow.addView(t2v);
-            songsTbl.addView(tbrow);
-        }
-
-        for (int i = 0; i < 25; i++) {
-            TableRow tbrow = new TableRow(this);
-
-            TextView t2v = new TextView(this);
-            t2v.setText("We don't talk anymore");
-            t2v.setTextColor(Color.BLACK);
-            t2v.setGravity(Gravity.CENTER);
-            tbrow.addView(t2v);
-            TextView t3v = new TextView(this);
-            t3v.setText("Charlie Puth");
-            t3v.setTextColor(Color.BLACK);
-            t3v.setGravity(Gravity.CENTER);
-            tbrow.addView(t3v);
-            TextView t4v = new TextView(this);
-            t4v.setText("4.05");
-            t4v.setTextColor(Color.BLACK);
-            t4v.setGravity(Gravity.CENTER);
-            tbrow.addView(t4v);
-            songsTbl.addView(tbrow);
-        }
         songsTbl.requestLayout();
     }
 }
