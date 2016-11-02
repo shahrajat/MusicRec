@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -31,6 +35,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScrollingActivity extends AppCompatActivity {
+    // Accelerometer
+    private SensorEventListener mEventListenerAccelerometer;
+    private float lastAccelerationY;
+
+    // Location
+    private float[] locationResults;
+    //private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +51,40 @@ public class ScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Playing Song in background...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Playing in background...", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Stop", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
+                                snackbar1.show();
+                            }
+                        }).show();
             }
         });
+
+
+        // Accelerometer
+        mEventListenerAccelerometer = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                float[] values = sensorEvent.values;
+                //update UI only when change is significant
+                if(lastAccelerationY == 0.0 || Math.abs(lastAccelerationY-values[1]) > 0.5) {
+                    lastAccelerationY = values[1];
+                    //updateUI(SensorType.ACCELEROMETER);
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+
+            }
+        };
 
         populateSongList();
     }
@@ -75,7 +113,7 @@ public class ScrollingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private List<Song> getEventsFromAnXML(Activity activity)
+    private List<Song> getSongsFromAnXML(Activity activity)
             throws XmlPullParserException, IOException
     {
         List<Song> songs = new ArrayList<Song>();
@@ -105,52 +143,39 @@ public class ScrollingActivity extends AppCompatActivity {
         }
         return songs;
     }
-    /*
-    <TextView
-                android:id="@+id/textView1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="We don't talk anymore"
-                android:layout_column="1"
-                android:textAppearance="?android:attr/textAppearanceMedium"></TextView>
-                <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:background="@drawable/cell_shape">
 
-     */
     // Adds all the songs present in xml/songs.xml to the table
     private void populateSongList() {
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
-
+        int textColor = Color.WHITE;
+        float textSize = 18;
         try {
-            List<Song> songs = getEventsFromAnXML(this);
+            List<Song> songs = getSongsFromAnXML(this);
             for(Song s: songs) {
                 TableRow tbrow = new TableRow(this);
-                tbrow.setPadding(0, 50, 0, 50);
+                tbrow.setPadding(0, 70, 0, 70);
                 tbrow.setBackgroundResource(R.drawable.cell_shape);
 
                 TextView tv1 = new TextView(this);
+                tv1.setTextSize(textSize);
                 tv1.setText(s.name);
-                tv1.setTextColor(Color.BLACK);
+                tv1.setTextColor(textColor);
                 tv1.setGravity(Gravity.LEFT);
                 tbrow.addView(tv1);
 
                 TextView t2v = new TextView(this);
                 t2v.setText(s.author);
-                t2v.setTextColor(Color.BLACK);
+                t2v.setTextColor(textColor);
                 tbrow.addView(t2v);
 
                 TextView t3v = new TextView(this);
                 t3v.setText(s.year);
-                t3v.setTextColor(Color.BLACK);
+                t3v.setTextColor(textColor);
                 tbrow.addView(t3v);
 
                 TextView t4v = new TextView(this);
                 t4v.setText(s.time);
-                t4v.setTextColor(Color.BLACK);
+                t4v.setTextColor(textColor);
                 t4v.setGravity(Gravity.RIGHT);
                 tbrow.addView(t4v);
                 songsTbl.addView(tbrow);

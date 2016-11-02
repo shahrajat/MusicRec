@@ -7,7 +7,8 @@
     tools:showIn="@layout/activity_scrolling"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.shahrajat.musicrec.ScrollingActivity">
+    tools:context="com.shahrajat.musicrec.ScrollingActivity"
+    >
 
 
     <!--<TextView-->
@@ -19,8 +20,9 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="2"
-        android:id="@+id/song_list">
+        android:id="@+id/song_list"
+        >
 
     </TableLayout>
+
 </android.support.v4.widget.NestedScrollView>
