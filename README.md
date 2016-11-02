@@ -43,5 +43,5 @@ In order to run the application locally, download the source code and import it 
 
 ## Sample Screenshots
 <p align="center">
-  <img src="https://media.giphy.com/media/3oriNKpgy5VTUxPaSc/giphy.gif"/>
+  <img src="https://media.giphy.com/media/3o7TKyIWxQD5rQ2RaM/giphy.gif"/>
 </p>
