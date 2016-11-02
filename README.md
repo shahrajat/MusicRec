@@ -1,5 +1,6 @@
 # MusicRec
 Acticity Based Music Recommender and Player
+
 Author: Rajat Shah (rshah6)
 
 ## Overview
