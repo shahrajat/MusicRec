@@ -20,7 +20,7 @@ Dependencies and External Libraries:
 
 In order to run the application locally, download the source code and import it in Android Studio. Then Compile and run it either in an emulator or export it as an APK to Android device.
 
-## Implemented Approach and TODO
+## Implemented Approach
 - Activity Recognition
  - __Driving__: The background service of the application continuously keeps track of the user location. If the **change in location coordinates** in past 10 seconds is substantial, it's a clear indication of user driving.
  - __Jogging__: Similar to driving, except the **change in location coordinates** is less.
@@ -28,8 +28,16 @@ In order to run the application locally, download the source code and import it 
  - __Studying/Relaxing__: If the **phone is stable** for a while (no change in location and accelerometer reading) and possibly located at Library/Home, then user can be safely assumed to be engaged in either studying or relaxing.
     
 - Music Player
- - __Song Database__: A local XML file containing a list of song metadata is read and the UI is dynamically generated using it. In a more practical setting (or cloud based service), the XML can be read from the a remote server.
- - __Song selection__: During the initial use of the Music Player by the user, the songs might be generated randomly. However, as the user starts interacting with Music Player, the player **learns** and starts mapping genre of the manual selection to activity. For a good learner, various aforementioned features can be user, however in this implementation a simplified approach based on frequence of genre is used.
+ - __Song Database__: A [local XML file](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) containing a list of basic song metadata is read and the UI is dynamically generated using it. In a more practical setting (or cloud based service), the XML can be read from the a remote server.
+ - __Song selection__: During the initial use of the Music Player by the user, the songs might be generated randomly. However, as the user starts interacting with Music Player, the player **learns** and starts mapping genre of the manual selection to activity. For a good learner, various aforementioned features can be user, however in this implementation a simplified approach based on frequence of genre is used. To allow for runtime adaptation of the application, developer makes no assumption of choice of music for a user during an activity. This means the **user history** containing Activity --> Frequent Genres is maintained.
+ - __Playing song__: To focus on the key aspects of context-aware and runtime adaptation, this is feature is implemented as mock action. User can still select a song from the playlist and the recommender engine plays the next song based on user
+
+## TODO
+   1. (Finished) Parse [raw XML](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) having songs metadata and dynamically populate the UI element.
+   2. (Finished) Use Android Location API to detect current location of the user.
+   3. (Finished) Find accelerometer reading using phone sensors.
+   4. (In progress) Store user history in a persistent storage.
+   5. (TBD)
 
 ## Sample Screenshots
 <p align="center">
