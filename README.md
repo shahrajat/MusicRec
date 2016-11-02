@@ -22,10 +22,10 @@ In order to run the application locally, download the source code and import it 
 
 ## Implemented Approach and TODO
 - Activity Recognition:
-    - Driving: The background service of the application continuously keeps track of the user location. If the **change in location coordinates** in past 10 seconds is substantial, it's a clear indication of user driving.
-    - Jogging: Similar to driving, except the **change in location coordinates** is less.
-    - Working out: Assuming the user keeps the phone in pocket while working out, a large (oscillating?) variance in accelerometer reading in past 10 seconds indicates movement of the user.
-    - Studying/Relaxing: If the phone is stable for a while (no change in location and accelerometer reading) and possibly located at Library/Home, then user can be safely assumed to be engaged in either studying or relaxing.
+ - Driving: The background service of the application continuously keeps track of the user location. If the **change in location coordinates** in past 10 seconds is substantial, it's a clear indication of user driving.
+ - Jogging: Similar to driving, except the **change in location coordinates** is less.
+ - Working out: Assuming the user keeps the phone in pocket while working out, a large (oscillating?) variance in accelerometer reading in past 10 seconds indicates movement of the user.
+ - Studying/Relaxing: If the phone is stable for a while (no change in location and accelerometer reading) and possibly located at Library/Home, then user can be safely assumed to be engaged in either studying or relaxing.
     
 - Music Player:
 
