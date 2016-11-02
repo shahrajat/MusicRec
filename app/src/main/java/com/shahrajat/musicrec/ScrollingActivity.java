@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +24,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -36,13 +39,16 @@ import java.util.List;
 
 public class ScrollingActivity extends AppCompatActivity {
     // Accelerometer
-    private SensorEventListener mEventListenerAccelerometer;
     private float lastAccelerationY;
 
     // Location
     private float[] locationResults;
-    //private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+
+    private SensorManager mSensorManager;
+    private SensorEventListener mEventListenerLight;
+    private SensorEventListener mEventListenerAccelerometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +82,7 @@ public class ScrollingActivity extends AppCompatActivity {
                 //update UI only when change is significant
                 if(lastAccelerationY == 0.0 || Math.abs(lastAccelerationY-values[1]) > 0.5) {
                     lastAccelerationY = values[1];
+                    // Perform action accordinly
                     //updateUI(SensorType.ACCELEROMETER);
                 }
             }
@@ -88,6 +95,26 @@ public class ScrollingActivity extends AppCompatActivity {
 
         populateSongList();
     }
+
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect(); //location
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(mEventListenerAccelerometer, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect(); //location
+        super.onStop();
+        mSensorManager.unregisterListener(mEventListenerAccelerometer);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -147,7 +174,7 @@ public class ScrollingActivity extends AppCompatActivity {
     // Adds all the songs present in xml/songs.xml to the table
     private void populateSongList() {
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
-        int textColor = Color.WHITE;
+        int textColor = Color.BLACK;
         float textSize = 18;
         try {
             List<Song> songs = getSongsFromAnXML(this);
