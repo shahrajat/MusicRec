@@ -38,7 +38,7 @@ In order to run the application locally, download the source code and import it 
    3. (Finished) Find accelerometer reading using phone sensors.
    4. (In progress) Update exisiting user genre preference whenever user manually selects a song.
    5. (In progress) Store user history in a persistent storage.
-   6. (Not Started) Identify user activity based on above factors.
+   6. (Finished) Identify user activity based on above factors.
    7. (Not Started) Dynamically update playlist based on best guess of current activity.
 
 ## Sample Screenshots
