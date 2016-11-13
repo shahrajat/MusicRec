@@ -1,30 +1,43 @@
 package com.shahrajat.musicrec;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.Xml;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.LocationServices;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,18 +50,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScrollingActivity extends AppCompatActivity {
-    // Accelerometer
-    private float lastAccelerationY;
+public class ScrollingActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
-    // Location
-    private float[] locationResults;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
-
+    // Sensor
     private SensorManager mSensorManager;
-    private SensorEventListener mEventListenerLight;
-    private SensorEventListener mEventListenerAccelerometer;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +64,10 @@ public class ScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Sensor - location
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
+        // Floating snackbar
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,48 +83,19 @@ public class ScrollingActivity extends AppCompatActivity {
             }
         });
 
+        // For activity recognition
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
 
-        // Accelerometer
-        mEventListenerAccelerometer = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                float[] values = sensorEvent.values;
-                //update UI only when change is significant
-                if(lastAccelerationY == 0.0 || Math.abs(lastAccelerationY-values[1]) > 0.5) {
-                    lastAccelerationY = values[1];
-                    // Perform action accordinly
-                    //updateUI(SensorType.ACCELEROMETER);
-                }
-            }
+        mGoogleApiClient.connect();
 
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
 
-            }
-        };
 
         populateSongList();
     }
-
-    @Override
-    public void onStart() {
-        mGoogleApiClient.connect(); //location
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mSensorManager.registerListener(mEventListenerAccelerometer, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-    }
-
-    @Override
-    public void onStop() {
-        mGoogleApiClient.disconnect(); //location
-        super.onStop();
-        mSensorManager.unregisterListener(mEventListenerAccelerometer);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,6 +121,49 @@ public class ScrollingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Sensors - location
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect(); //location
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect(); //location
+        super.onStop();
+    }
+
+    //Location service
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        try {
+            Intent intent = new Intent( this, ActivityRecognizedService.class );
+            PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
+            ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mGoogleApiClient, 3000, pendingIntent );
+
+        } catch (SecurityException ex) {
+
+        }
+    }
+
+    //Location service
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+    //Location service
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    // Helper function
     private List<Song> getSongsFromAnXML(Activity activity)
             throws XmlPullParserException, IOException
     {
