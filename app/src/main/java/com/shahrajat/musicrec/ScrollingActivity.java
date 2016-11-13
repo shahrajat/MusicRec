@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.resource;
+
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
@@ -187,6 +189,8 @@ public class ScrollingActivity extends AppCompatActivity implements
                 newSong.year = xpp.getText();
                 xpp.next();xpp.next();xpp.next();
                 newSong.time = xpp.getText();
+                xpp.next();xpp.next();xpp.next();
+                newSong.genre = xpp.getText();
                 songs.add(newSong);
             }
             eventType = xpp.next();
@@ -198,36 +202,84 @@ public class ScrollingActivity extends AppCompatActivity implements
     private void populateSongList() {
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
         int textColor = Color.BLACK;
-        float textSize = 18;
+        float textSize = 16;
         try {
+
+            // Add header row
+            TableRow tbrow = new TableRow(this);
+            tbrow.setPadding(0, 70, 0, 70);
+            tbrow.setBackgroundResource(R.drawable.cell_shape);
+
+            TextView tv1 = new TextView(this);
+            tv1.setTextSize(textSize);
+            tv1.setText("Name");
+            tv1.setTextColor(textColor);
+            tv1.setGravity(Gravity.LEFT);
+            tbrow.addView(tv1);
+
+            TextView t2v = new TextView(this);
+            t2v.setText("Author");
+            t2v.setTextColor(textColor);
+            tbrow.addView(t2v);
+
+                /*
+                TextView t3v = new TextView(this);
+                t3v.setText(song.year);
+                t3v.setTextColor(textColor);
+                tbrow.addView(t3v);
+                */
+
+            TextView t4v = new TextView(this);
+            t4v.setText("Duration");
+            t4v.setTextColor(textColor);
+            tbrow.addView(t4v);
+
+            TextView t5v = new TextView(this);
+            t5v.setText("Genre");
+            t5v.setTextColor(textColor);
+            t5v.setGravity(Gravity.RIGHT);
+            tbrow.addView(t5v);
+
+            tbrow.setBackgroundResource(R.color.common_plus_signin_btn_text_dark_disabled);
+
+            songsTbl.addView(tbrow);
+
             List<Song> songs = getSongsFromAnXML(this);
-            for(Song s: songs) {
-                TableRow tbrow = new TableRow(this);
+            for(Song song: songs) {
+                tbrow = new TableRow(this);
                 tbrow.setPadding(0, 70, 0, 70);
                 tbrow.setBackgroundResource(R.drawable.cell_shape);
 
-                TextView tv1 = new TextView(this);
+                tv1 = new TextView(this);
                 tv1.setTextSize(textSize);
-                tv1.setText(s.name);
+                tv1.setText(song.name);
                 tv1.setTextColor(textColor);
                 tv1.setGravity(Gravity.LEFT);
                 tbrow.addView(tv1);
 
-                TextView t2v = new TextView(this);
-                t2v.setText(s.author);
+                t2v = new TextView(this);
+                t2v.setText(song.author);
                 t2v.setTextColor(textColor);
                 tbrow.addView(t2v);
 
+                /*
                 TextView t3v = new TextView(this);
-                t3v.setText(s.year);
+                t3v.setText(song.year);
                 t3v.setTextColor(textColor);
                 tbrow.addView(t3v);
+                */
 
-                TextView t4v = new TextView(this);
-                t4v.setText(s.time);
+                t4v = new TextView(this);
+                t4v.setText(song.time);
                 t4v.setTextColor(textColor);
-                t4v.setGravity(Gravity.RIGHT);
                 tbrow.addView(t4v);
+
+                t5v = new TextView(this);
+                t5v.setText(song.genre);
+                t5v.setTextColor(textColor);
+                t5v.setGravity(Gravity.RIGHT);
+                tbrow.addView(t5v);
+
                 songsTbl.addView(tbrow);
 
             }

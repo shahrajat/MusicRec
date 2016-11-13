@@ -79,7 +79,6 @@ public class ActivityRecognizedService extends IntentService {
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
-
         for( DetectedActivity activity : probableActivities ) {
             updateUI(activity);
         }

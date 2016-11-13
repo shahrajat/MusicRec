@@ -9,6 +9,7 @@ public class Song {
     public String author;
     public String year;
     public String time;
+    public String genre;
 
     @Override
     public String toString() {
