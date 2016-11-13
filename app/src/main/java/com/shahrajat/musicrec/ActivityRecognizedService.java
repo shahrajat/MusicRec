@@ -1,7 +1,9 @@
 package com.shahrajat.musicrec;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -24,83 +27,61 @@ import java.util.List;
  */
 public class ActivityRecognizedService extends IntentService {
 
+    public static TextView mActivityView;
+    Handler handler;
+
     public ActivityRecognizedService() {
         super("ActivityRecognizedService");
+        handler = new Handler();
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+
         if (intent != null) {
             if(ActivityRecognitionResult.hasResult(intent)) {
                 ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
                 handleDetectedActivities( result.getProbableActivities() );
             }
-
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void runOnUiThread(Runnable runnable) {
+        handler.post(runnable);
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionBaz(String param1, String param2) {
-        // TODO: Handle action Baz
-        throw new UnsupportedOperationException("Not yet implemented");
+    // Create a new thread to update the UI
+    private void updateUI(final DetectedActivity userActivity) {
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                // All options: IN_VEHICLE, ON_BICYCLE, ON_FOOT, RUNNING, STILL, TILTING, WALKING
+                switch (userActivity.getType()) {
+                    case DetectedActivity.IN_VEHICLE:
+                        mActivityView.setText("Activity: Driving");
+                        break;
+                    case DetectedActivity.RUNNING:
+                        mActivityView.setText("Activity: Jogging");
+                        break;
+                    case DetectedActivity.STILL:
+                        mActivityView.setText("Activity: Relaxing"); //Set the distance from Current location
+                        break;
+                    case DetectedActivity.TILTING:
+                        mActivityView.setText("Activity: WorkingOut");
+                        break;
+                    case DetectedActivity.UNKNOWN:
+                        mActivityView.setText("Activity: Unknown");
+                        break;
+                }
+            }
+        });
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
 
         for( DetectedActivity activity : probableActivities ) {
-            switch( activity.getType() ) {
-                case DetectedActivity.IN_VEHICLE: {
-                    Log.e( "ActivityRecogition", "In Vehicle: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.ON_BICYCLE: {
-                    Log.e( "ActivityRecogition", "On Bicycle: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.ON_FOOT: {
-                    Log.e( "ActivityRecogition", "On Foot: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.RUNNING: {
-                    Log.e( "ActivityRecogition", "Running: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.STILL: {
-                    Log.e( "ActivityRecogition", "Still: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.TILTING: {
-                    Log.e( "ActivityRecogition", "Tilting: " + activity.getConfidence() );
-                    break;
-                }
-                case DetectedActivity.WALKING: {
-                    Log.e( "ActivityRecogition", "Walking: " + activity.getConfidence() );
-                    if( activity.getConfidence() >= 75 ) {
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-                        builder.setContentText( "Are you walking?" );
-                        builder.setSmallIcon( R.mipmap.ic_launcher );
-                        builder.setContentTitle( getString( R.string.app_name ) );
-                        NotificationManagerCompat.from(this).notify(0, builder.build());
-                    }
-                    break;
-                }
-                case DetectedActivity.UNKNOWN: {
-                    Log.e( "ActivityRecogition", "Unknown: " + activity.getConfidence() );
-                    break;
-                }
-            }
+            updateUI(activity);
         }
     }
 }

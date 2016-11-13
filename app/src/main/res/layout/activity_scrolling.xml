@@ -31,6 +31,15 @@
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+            <TextView
+                android:text=""
+                android:textSize="20dp"
+                android:layout_width="221dp"
+                android:layout_height="30dp"
+                android:id="@+id/activityText"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp" />
+
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 

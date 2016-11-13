@@ -37,6 +37,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
 
 import org.w3c.dom.Document;
@@ -53,8 +54,6 @@ import java.util.List;
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
-    // Sensor
-    private SensorManager mSensorManager;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -64,8 +63,8 @@ public class ScrollingActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Sensor - location
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // Initialize activity text view
+        ActivityRecognizedService.mActivityView = (TextView) findViewById(R.id.activityText);
 
         // Floating snackbar
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -139,7 +138,7 @@ public class ScrollingActivity extends AppCompatActivity implements
         super.onStop();
     }
 
-    //Location service
+    // Activity recognition service
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         try {
