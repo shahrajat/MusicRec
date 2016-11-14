@@ -39,7 +39,7 @@ In order to run the application locally, download the source code and import it 
    4. (Finished) Update exisiting user genre preference whenever user manually selects a song.
    5. (Finished) Store user history in a persistent storage.
    6. (Finished) Identify user activity based on above factors.
-   7. (Not Started) Dynamically update playlist based on best guess of current activity.
+   7. (Finished) Dynamically update playlist based on best guess of current activity.
 
 ## Sample Screenshots
 <p align="center">
