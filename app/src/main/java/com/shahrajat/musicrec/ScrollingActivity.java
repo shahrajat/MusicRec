@@ -222,9 +222,10 @@ public class ScrollingActivity extends AppCompatActivity implements
                         snackbar1.show();
                     }
                 }).show();
-        
+
         // Get current activity
-        try { // Get genre of clicked song
+        try {
+            // Get genre of clicked song
             final String genre = getGenreFromId(view.getId());
             final String text = String.valueOf(mActivityView.getText());
             if (text != null) {
@@ -447,7 +448,11 @@ public class ScrollingActivity extends AppCompatActivity implements
                 tbrow.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick( View v ) {
-                        songClicked(v);
+                        try {
+                            songClicked(v);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 });
                 songsTbl.addView(tbrow);
