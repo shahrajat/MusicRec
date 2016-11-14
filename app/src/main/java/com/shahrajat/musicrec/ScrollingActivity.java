@@ -3,7 +3,10 @@ package com.shahrajat.musicrec;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -61,13 +64,18 @@ import static com.shahrajat.musicrec.ActivityRecognizedService.mActivityView;
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
+    private Context mContext;
     private GoogleApiClient mGoogleApiClient;
     private HashMap<String, List<String>> activityToGenres;   // Stores user genre preferences
     public static final String MY_PREFS_NAME = "MyPrefsFile";
     List<Song> songs;
+    MyReceiver myReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getApplicationContext();
+        myReceiver = new MyReceiver();
+        registerReceiver(myReceiver, new IntentFilter("POPULATE_INTENT"));
         setContentView(R.layout.activity_scrolling);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -112,7 +120,8 @@ public class ScrollingActivity extends AppCompatActivity implements
         editor.putString("working", "Rap");
         editor.commit();
 
-        populateSongList(null);
+        // Default playlist for relaxing
+        populateSongList("relaxing");
     }
 
     @Override
@@ -157,6 +166,14 @@ public class ScrollingActivity extends AppCompatActivity implements
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(myReceiver!=null) {
+            unregisterReceiver(myReceiver);
+        }
+    }
+
     // Activity recognition service
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -193,30 +210,18 @@ public class ScrollingActivity extends AppCompatActivity implements
         if(view ==  null)
             return;
 
-        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()) + "; updating preference", Snackbar.LENGTH_SHORT).show();
-        // Show a delayed Playing message
+        final int songID = view.getId();
 
-        try {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Snackbar.make(view, "Playing " + String.valueOf(view.getId()) + " in background...", Snackbar.LENGTH_INDEFINITE)
-                                .setAction("Stop", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
-                                        snackbar1.show();
-                                    }
-                                }).show();
-                    } catch (Exception e) {
-
+        // Show snackbar on bottom
+        Snackbar.make(view, "Song changed to: " + String.valueOf(songID) + "; updating preference", Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(view, "Playing " + String.valueOf(songID) + " in background...", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Stop", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
+                        snackbar1.show();
                     }
-                }
-            }, 2000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                }).show();
 
 
         // Get current activity
@@ -328,9 +333,19 @@ public class ScrollingActivity extends AppCompatActivity implements
         return songs;
     }
 
+    public class MyReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String genre = intent.getStringExtra("genre");
+            populateSongList(genre);
+        }
+    }
     // Adds all the songs present in xml/songs.xml to the table
     public void populateSongList(String genre) {
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
+        if(songsTbl==null)
+            return;
         songsTbl.removeAllViews();
         int textColor = Color.BLACK;
         float textSize = 16;

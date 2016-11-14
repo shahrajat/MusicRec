@@ -2,6 +2,7 @@ package com.shahrajat.musicrec;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -28,9 +29,16 @@ import java.util.List;
  */
 public class ActivityRecognizedService extends IntentService {
 
+    private Context mContext;
     public static TextView mActivityView;
     private DetectedActivity prevActivity;      // Keep track of prev activity to detect changes
     Handler handler;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mContext = getApplicationContext();
+    }
 
     public ActivityRecognizedService() {
         super("ActivityRecognizedService");
@@ -54,13 +62,25 @@ public class ActivityRecognizedService extends IntentService {
 
     private void reorderPlayList(String act) {
         SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
-        String genre  = prefs.getString(act, "");
-        ScrollingActivity sa = new ScrollingActivity();
-        //sa.populateSongList(genre);
+        if(prefs==null)
+            return;
+        String genre  = prefs.getString(act, null);
+        if(genre==null)
+            return;
+
+        try {
+            Intent i = new Intent("POPULATE_INTENT");
+            i.putExtra("genre", genre);
+            sendBroadcast(i);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     // Create a new thread to update the UI
     private void updateUI(final DetectedActivity userActivity) {
+
 
         if(mActivityView == null)
             return;
@@ -83,6 +103,7 @@ public class ActivityRecognizedService extends IntentService {
                     case DetectedActivity.STILL:
                         toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
                         mActivityView.setText(toDisplay);
+                        reorderPlayList("relaxing");
                         break;
                     case DetectedActivity.TILTING:
                         toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");
