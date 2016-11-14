@@ -222,8 +222,7 @@ public class ScrollingActivity extends AppCompatActivity implements
                         snackbar1.show();
                     }
                 }).show();
-
-
+        
         // Get current activity
         try { // Get genre of clicked song
             final String genre = getGenreFromId(view.getId());
