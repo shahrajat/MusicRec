@@ -52,49 +52,54 @@ public class ActivityRecognizedService extends IntentService {
         handler.post(runnable);
     }
 
+    private void playActivitySongs(String act) {
+        SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
+        prefs.getString(act, "");
+        ScrollingActivity sa = new ScrollingActivity();
+        List<Song> songs = sa.getGenreSongs(sa, "Rock");
+
+    }
+
     // Create a new thread to update the UI
     private void updateUI(final DetectedActivity userActivity) {
-        if(prevActivity==null || prevActivity != userActivity) {
-            prevActivity = userActivity;    // Update prev activity
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // All options: IN_VEHICLE, ON_BICYCLE, ON_FOOT, RUNNING, STILL, TILTING, WALKING
-                    String toDisplay = "";
-                    SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
-                    switch (userActivity.getType()) {
-                        case DetectedActivity.IN_VEHICLE:
-                            toDisplay = "Driving: " + prefs.getString("driving", "No pref");
-                            mActivityView.setText(toDisplay);
 
-                            break;
-                        case DetectedActivity.RUNNING:
-                            toDisplay = "Jogging: " + prefs.getString("running", "No pref");
-                            mActivityView.setText(toDisplay);
-                            break;
-                        case DetectedActivity.STILL:
-                            toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
-                            mActivityView.setText(toDisplay);
-                            break;
-                        case DetectedActivity.TILTING:
-                            toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");
-                            mActivityView.setText(toDisplay);
-                            break;
-                        case DetectedActivity.UNKNOWN:
-                            toDisplay = "Unknown: " + prefs.getString("random", "Random");
-                            mActivityView.setText(toDisplay);
-                            break;
-                    }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // All options: IN_VEHICLE, ON_BICYCLE, ON_FOOT, RUNNING, STILL, TILTING, WALKING
+                String toDisplay = "";
+                SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                switch (userActivity.getType()) {
+                    case DetectedActivity.IN_VEHICLE:
+                        toDisplay = "Driving: " + prefs.getString("driving", "No pref");
+                        mActivityView.setText(toDisplay);
+                        break;
+                    case DetectedActivity.RUNNING:
+                        toDisplay = "Jogging: " + prefs.getString("running", "No pref");
+                        mActivityView.setText(toDisplay);
+                        break;
+                    case DetectedActivity.STILL:
+                        toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
+                        mActivityView.setText(toDisplay);
+                        //playActivitySongs("relaxing");
+                        break;
+                    case DetectedActivity.TILTING:
+                        toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");
+                        mActivityView.setText(toDisplay);
+                        break;
+                    case DetectedActivity.UNKNOWN:
+                        toDisplay = "Unknown: " + prefs.getString("random", "Random");
+                        mActivityView.setText(toDisplay);
+                        break;
                 }
-            });
-        }
+            }
+        });
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
         for( DetectedActivity activity : probableActivities ) {
             updateUI(activity);
         }
-
     }
 }
 

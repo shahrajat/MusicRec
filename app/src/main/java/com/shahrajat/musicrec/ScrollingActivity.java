@@ -101,11 +101,11 @@ public class ScrollingActivity extends AppCompatActivity implements
 
         // Default preferences for user - updated when user chooses song manually
         SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
-        editor.putString("running", "Rock,Pop");
-        editor.putString("relaxing", "Rock,Country");
-        editor.putString("driving", "Rap,Country");
-        editor.putString("relaxing", "Rap,Pop");
-        editor.putString("working", "Rap,Rock");
+        editor.putString("running", "Rock");
+        editor.putString("relaxing", "Country");
+        editor.putString("driving", "Country");
+        editor.putString("relaxing", "Pop");
+        editor.putString("working", "Rap");
         editor.commit();
 
         populateSongList();
@@ -179,7 +179,7 @@ public class ScrollingActivity extends AppCompatActivity implements
 
     // Take various actions when a song is clicked
     private void songClicked(final View view) {
-        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()), Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()) + "; updating preference", Snackbar.LENGTH_SHORT).show();
         // Show a delayed Playing message
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -195,10 +195,49 @@ public class ScrollingActivity extends AppCompatActivity implements
             }
         }, 2000);
 
+        // Get genre of clicked song
+        String genre = getGenreFromId(view.getId());
+
+        // Get current activity
+        final String text = String.valueOf(mActivityView.getText());
+        if(text!=null){
+            final String currActivity = text.split(":")[0].toLowerCase();
+            // Update the user preference
+            SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+            editor.putString(currActivity, genre);
+            editor.commit();
+
+            // Update UI for new preference
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                    mActivityView.setText(text.split(" ")[0] + " " + prefs.getString(currActivity, ""));
+                }
+            });
+        }
+    }
+
+
+    public String getGenreFromId(int id) {
+        String genre="";
+        try {
+            List<Song> allSongs = getSongsFromAnXML(this);
+            for(Song song : allSongs) {
+                if(song.id == id) {
+                    genre = song.genre;
+                }
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return genre;
     }
 
     // Returns all the available songs with provided genre
-    private List<Song> getGenreSongs(Activity activity, String genre) {
+    public List<Song> getGenreSongs(Activity activity, String genre) {
         List<Song> filteredSongs = new ArrayList<Song>();
 
         try {
