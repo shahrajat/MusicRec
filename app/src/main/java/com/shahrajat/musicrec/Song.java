@@ -5,11 +5,16 @@ package com.shahrajat.musicrec;
  */
 
 public class Song {
+    public int id;
     public String name;
     public String author;
     public String year;
     public String time;
     public String genre;
+
+    Song(){
+        id = 0;
+    }
 
     @Override
     public String toString() {

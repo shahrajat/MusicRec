@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Color;
@@ -23,6 +24,7 @@ import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Xml;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -49,14 +51,18 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.R.attr.resource;
+import static com.shahrajat.musicrec.ActivityRecognizedService.mActivityView;
 
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private GoogleApiClient mGoogleApiClient;
+    private HashMap<String, List<String>> activityToGenres;   // Stores user genre preferences
+    public static final String MY_PREFS_NAME = "MyPrefsFile";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +72,14 @@ public class ScrollingActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         // Initialize activity text view
-        ActivityRecognizedService.mActivityView = (TextView) findViewById(R.id.activityText);
+        mActivityView = (TextView) findViewById(R.id.activityText);
 
         // Floating snackbar
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Playing in background...", Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(view, "Playing 1 in background...", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Stop", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -93,7 +99,14 @@ public class ScrollingActivity extends AppCompatActivity implements
 
         mGoogleApiClient.connect();
 
-
+        // Default preferences for user - updated when user chooses song manually
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putString("running", "Rock,Pop");
+        editor.putString("relaxing", "Rock,Country");
+        editor.putString("driving", "Rap,Country");
+        editor.putString("relaxing", "Rap,Pop");
+        editor.putString("working", "Rap,Rock");
+        editor.commit();
 
         populateSongList();
     }
@@ -164,6 +177,45 @@ public class ScrollingActivity extends AppCompatActivity implements
 
     }
 
+    // Take various actions when a song is clicked
+    private void songClicked(final View view) {
+        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()), Snackbar.LENGTH_SHORT).show();
+        // Show a delayed Playing message
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Snackbar.make(view, "Playing "+ String.valueOf(view.getId()) +" in background...", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Stop", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
+                                snackbar1.show();
+                            }
+                        }).show();
+            }
+        }, 2000);
+
+    }
+
+    // Returns all the available songs with provided genre
+    private List<Song> getGenreSongs(Activity activity, String genre) {
+        List<Song> filteredSongs = new ArrayList<Song>();
+
+        try {
+            List<Song> allSongs = getSongsFromAnXML(this);
+            for(Song song : allSongs) {
+                if(song.genre.equals(genre)) {
+                    filteredSongs.add(song);
+                }
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return filteredSongs;
+    }
+
     // Helper function
     private List<Song> getSongsFromAnXML(Activity activity)
             throws XmlPullParserException, IOException
@@ -181,6 +233,7 @@ public class ScrollingActivity extends AppCompatActivity implements
             if(eventType == XmlPullParser.START_TAG && xpp.getName().equals("item"))
             {
                 Song newSong = new Song();
+                newSong.id = Integer.parseInt(xpp.getAttributeValue(null, "id"));
                 xpp.next(); xpp.next();
                 newSong.name = xpp.getText();
                 xpp.next(); xpp.next();xpp.next();
@@ -210,6 +263,13 @@ public class ScrollingActivity extends AppCompatActivity implements
             tbrow.setPadding(0, 70, 0, 70);
             tbrow.setBackgroundResource(R.drawable.cell_shape);
 
+            TextView tv0 = new TextView(this);
+            tv0.setText("ID");
+            tv0.setTextColor(textColor);
+            tv0.setMinWidth(100);
+            tv0.setPadding(20, 0, 0, 0);
+            tbrow.addView(tv0);
+
             TextView tv1 = new TextView(this);
             tv1.setTextSize(textSize);
             tv1.setText("Name");
@@ -217,10 +277,10 @@ public class ScrollingActivity extends AppCompatActivity implements
             tv1.setGravity(Gravity.LEFT);
             tbrow.addView(tv1);
 
-            TextView t2v = new TextView(this);
-            t2v.setText("Author");
-            t2v.setTextColor(textColor);
-            tbrow.addView(t2v);
+            TextView tv2 = new TextView(this);
+            tv2.setText("Author");
+            tv2.setTextColor(textColor);
+            tbrow.addView(tv2);
 
                 /*
                 TextView t3v = new TextView(this);
@@ -229,16 +289,16 @@ public class ScrollingActivity extends AppCompatActivity implements
                 tbrow.addView(t3v);
                 */
 
-            TextView t4v = new TextView(this);
-            t4v.setText("Duration");
-            t4v.setTextColor(textColor);
-            tbrow.addView(t4v);
+            TextView tv4 = new TextView(this);
+            tv4.setText("Time");
+            tv4.setTextColor(textColor);
+            tbrow.addView(tv4);
 
-            TextView t5v = new TextView(this);
-            t5v.setText("Genre");
-            t5v.setTextColor(textColor);
-            t5v.setGravity(Gravity.RIGHT);
-            tbrow.addView(t5v);
+            TextView tv5 = new TextView(this);
+            tv5.setText("Genre");
+            tv5.setTextColor(textColor);
+            tv5.setGravity(Gravity.RIGHT);
+            tbrow.addView(tv5);
 
             tbrow.setBackgroundResource(R.color.common_plus_signin_btn_text_dark_disabled);
 
@@ -250,17 +310,23 @@ public class ScrollingActivity extends AppCompatActivity implements
                 tbrow.setPadding(0, 70, 0, 70);
                 tbrow.setBackgroundResource(R.drawable.cell_shape);
 
+                tv0 = new TextView(this);
+                tv0.setText(String.valueOf(song.id));
+                tv0.setTextColor(textColor);
+                tv0.setGravity(Gravity.LEFT);
+                tv0.setPadding(20, 0, 0, 0);
+                tbrow.addView(tv0);
+
                 tv1 = new TextView(this);
                 tv1.setTextSize(textSize);
                 tv1.setText(song.name);
                 tv1.setTextColor(textColor);
-                tv1.setGravity(Gravity.LEFT);
                 tbrow.addView(tv1);
 
-                t2v = new TextView(this);
-                t2v.setText(song.author);
-                t2v.setTextColor(textColor);
-                tbrow.addView(t2v);
+                tv2 = new TextView(this);
+                tv2.setText(song.author);
+                tv2.setTextColor(textColor);
+                tbrow.addView(tv2);
 
                 /*
                 TextView t3v = new TextView(this);
@@ -269,17 +335,24 @@ public class ScrollingActivity extends AppCompatActivity implements
                 tbrow.addView(t3v);
                 */
 
-                t4v = new TextView(this);
-                t4v.setText(song.time);
-                t4v.setTextColor(textColor);
-                tbrow.addView(t4v);
+                tv4 = new TextView(this);
+                tv4.setText(song.time);
+                tv4.setTextColor(textColor);
+                tbrow.addView(tv4);
 
-                t5v = new TextView(this);
-                t5v.setText(song.genre);
-                t5v.setTextColor(textColor);
-                t5v.setGravity(Gravity.RIGHT);
-                tbrow.addView(t5v);
+                tv5 = new TextView(this);
+                tv5.setText(song.genre);
+                tv5.setTextColor(textColor);
+                tv5.setGravity(Gravity.RIGHT);
+                tbrow.addView(tv5);
 
+                tbrow.setId(song.id);
+                tbrow.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick( View v ) {
+                        songClicked(v);
+                    }
+                });
                 songsTbl.addView(tbrow);
 
             }

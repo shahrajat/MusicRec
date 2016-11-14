@@ -3,6 +3,7 @@ package com.shahrajat.musicrec;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationManagerCompat;
@@ -28,6 +29,7 @@ import java.util.List;
 public class ActivityRecognizedService extends IntentService {
 
     public static TextView mActivityView;
+    private DetectedActivity prevActivity;      // Keep track of prev activity to detect changes
     Handler handler;
 
     public ActivityRecognizedService() {
@@ -52,36 +54,47 @@ public class ActivityRecognizedService extends IntentService {
 
     // Create a new thread to update the UI
     private void updateUI(final DetectedActivity userActivity) {
-        runOnUiThread(new Runnable() {
+        if(prevActivity==null || prevActivity != userActivity) {
+            prevActivity = userActivity;    // Update prev activity
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // All options: IN_VEHICLE, ON_BICYCLE, ON_FOOT, RUNNING, STILL, TILTING, WALKING
+                    String toDisplay = "";
+                    SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                    switch (userActivity.getType()) {
+                        case DetectedActivity.IN_VEHICLE:
+                            toDisplay = "Driving: " + prefs.getString("driving", "No pref");
+                            mActivityView.setText(toDisplay);
 
-            @Override
-            public void run() {
-                // All options: IN_VEHICLE, ON_BICYCLE, ON_FOOT, RUNNING, STILL, TILTING, WALKING
-                switch (userActivity.getType()) {
-                    case DetectedActivity.IN_VEHICLE:
-                        mActivityView.setText("Activity: Driving");
-                        break;
-                    case DetectedActivity.RUNNING:
-                        mActivityView.setText("Activity: Jogging");
-                        break;
-                    case DetectedActivity.STILL:
-                        mActivityView.setText("Activity: Relaxing"); //Set the distance from Current location
-                        break;
-                    case DetectedActivity.TILTING:
-                        mActivityView.setText("Activity: WorkingOut");
-                        break;
-                    case DetectedActivity.UNKNOWN:
-                        mActivityView.setText("Activity: Unknown");
-                        break;
+                            break;
+                        case DetectedActivity.RUNNING:
+                            toDisplay = "Jogging: " + prefs.getString("running", "No pref");
+                            mActivityView.setText(toDisplay);
+                            break;
+                        case DetectedActivity.STILL:
+                            toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
+                            mActivityView.setText(toDisplay);
+                            break;
+                        case DetectedActivity.TILTING:
+                            toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");
+                            mActivityView.setText(toDisplay);
+                            break;
+                        case DetectedActivity.UNKNOWN:
+                            toDisplay = "Unknown: " + prefs.getString("random", "Random");
+                            mActivityView.setText(toDisplay);
+                            break;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void handleDetectedActivities(List<DetectedActivity> probableActivities) {
         for( DetectedActivity activity : probableActivities ) {
             updateUI(activity);
         }
+
     }
 }
 
