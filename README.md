@@ -30,7 +30,9 @@ In order to run the application locally, download the source code and import it 
 - Music Player
  - __Song Database__: A [local XML file](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) containing a list of basic song metadata is read and the UI is dynamically generated using it. In a more practical setting (or cloud based service), the XML can be read from the a remote server.
  - __Song selection__: During the initial use of the Music Player by the user, the songs might be generated randomly. However, as the user starts interacting with Music Player, the player **learns** and starts mapping genre of the manual selection to activity. For a good learner, various aforementioned features can be user, however in this implementation a simplified approach based on frequence of genre is used. To allow for runtime adaptation of the application, developer makes no assumption of choice of music for a user during an activity. This means the **user history** containing Activity --> Frequent Genres is maintained.
- - __Playing song__: To focus on the key aspects of context-aware and runtime adaptation, this is feature is implemented as mock action. User can still select a song from the playlist and the recommender engine plays the next song based on user
+ - __Playing song__: To focus on the key aspects of context-aware and runtime adaptation, this is feature is implemented as mock action. User can still select a song from the playlist and the recommender engine plays the next song based on user.
+
+ Update 11/13/2016: For higher accuracy of activity detection, Android Activity Recognition API is used.
 
 ## TODO
    1. (Finished) Parse [raw XML](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) having songs metadata and dynamically populate the UI element.
@@ -40,6 +42,13 @@ In order to run the application locally, download the source code and import it 
    5. (Finished) Store user history in a persistent storage.
    6. (Finished) Identify user activity based on above factors.
    7. (Finished) Dynamically update playlist based on best guess of current activity.
+
+## Application Flow and internal details
+   1. When the application is launched, default order of the songs is displayed.
+   2. The top text displays the current detected activity and internally saved user preference of genre.
+   3. As soon as the current activity is detected (or changed), the play list is reordered such that - top songs are genre correspoding to that activity.
+   4. Whenever user manually selects a song from the list, genre preference is updated instantly. This also results in reordering of the playlist.
+   5. The Snackbar at the bottom displays various event messages based on user interation with the application.
 
 ## Sample Screenshots
 <p align="center">
