@@ -52,16 +52,18 @@ public class ActivityRecognizedService extends IntentService {
         handler.post(runnable);
     }
 
-    private void playActivitySongs(String act) {
+    private void reorderPlayList(String act) {
         SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
-        prefs.getString(act, "");
+        String genre  = prefs.getString(act, "");
         ScrollingActivity sa = new ScrollingActivity();
-        List<Song> songs = sa.getGenreSongs(sa, "Rock");
-
+        //sa.populateSongList(genre);
     }
 
     // Create a new thread to update the UI
     private void updateUI(final DetectedActivity userActivity) {
+
+        if(mActivityView == null)
+            return;
 
         runOnUiThread(new Runnable() {
             @Override
@@ -81,7 +83,6 @@ public class ActivityRecognizedService extends IntentService {
                     case DetectedActivity.STILL:
                         toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
                         mActivityView.setText(toDisplay);
-                        //playActivitySongs("relaxing");
                         break;
                     case DetectedActivity.TILTING:
                         toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");

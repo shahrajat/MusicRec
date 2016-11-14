@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static android.R.attr.resource;
 import static com.shahrajat.musicrec.ActivityRecognizedService.mActivityView;
@@ -63,7 +64,7 @@ public class ScrollingActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private HashMap<String, List<String>> activityToGenres;   // Stores user genre preferences
     public static final String MY_PREFS_NAME = "MyPrefsFile";
-
+    List<Song> songs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +80,10 @@ public class ScrollingActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Playing 1 in background...", Snackbar.LENGTH_INDEFINITE)
+
+                int topID = getTopSongID();
+
+                Snackbar.make(view, "Playing " + String.valueOf(topID) + " in background...", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Stop", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -108,7 +112,7 @@ public class ScrollingActivity extends AppCompatActivity implements
         editor.putString("working", "Rap");
         editor.commit();
 
-        populateSongList();
+        populateSongList(null);
     }
 
     @Override
@@ -162,62 +166,90 @@ public class ScrollingActivity extends AppCompatActivity implements
             ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mGoogleApiClient, 3000, pendingIntent );
 
         } catch (SecurityException ex) {
-
+            ex.printStackTrace();
         }
     }
 
-    //Location service
     @Override
     public void onConnectionSuspended(int i) {
 
     }
-    //Location service
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 
-    // Take various actions when a song is clicked
-    private void songClicked(final View view) {
-        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()) + "; updating preference", Snackbar.LENGTH_SHORT).show();
-        // Show a delayed Playing message
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Snackbar.make(view, "Playing "+ String.valueOf(view.getId()) +" in background...", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Stop", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
-                                snackbar1.show();
-                            }
-                        }).show();
-            }
-        }, 2000);
-
-        // Get genre of clicked song
-        String genre = getGenreFromId(view.getId());
-
-        // Get current activity
-        final String text = String.valueOf(mActivityView.getText());
-        if(text!=null){
-            final String currActivity = text.split(":")[0].toLowerCase();
-            // Update the user preference
-            SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
-            editor.putString(currActivity, genre);
-            editor.commit();
-
-            // Update UI for new preference
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
-                    mActivityView.setText(text.split(" ")[0] + " " + prefs.getString(currActivity, ""));
-                }
-            });
+    private int getTopSongID() {
+        if(songs!=null){
+            return songs.get(0).id;
         }
+        return 1;
     }
 
+    // Take various actions when a song is clicked
+    private void songClicked(final View view) {
+
+        if(view ==  null)
+            return;
+
+        Snackbar.make(view, "Song changed to: " + String.valueOf(view.getId()) + "; updating preference", Snackbar.LENGTH_SHORT).show();
+        // Show a delayed Playing message
+
+        try {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Snackbar.make(view, "Playing " + String.valueOf(view.getId()) + " in background...", Snackbar.LENGTH_INDEFINITE)
+                                .setAction("Stop", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Snackbar snackbar1 = Snackbar.make(view, "Stopped playing...", Snackbar.LENGTH_SHORT);
+                                        snackbar1.show();
+                                    }
+                                }).show();
+                    } catch (Exception e) {
+
+                    }
+                }
+            }, 2000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        // Get current activity
+        try { // Get genre of clicked song
+            final String genre = getGenreFromId(view.getId());
+            final String text = String.valueOf(mActivityView.getText());
+            if (text != null) {
+                final String currActivity = text.split(":")[0].toLowerCase();
+                // Update the user preference
+                SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+                editor.putString(currActivity, genre);
+                editor.commit();
+
+                // Update UI for new preference
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SharedPreferences prefs = getSharedPreferences(ScrollingActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                        mActivityView.setText(text.split(" ")[0] + " " + prefs.getString(currActivity, ""));
+                    }
+                });
+            }
+            // Reorder playlist
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    populateSongList(genre);
+                }
+            }, 1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public String getGenreFromId(int id) {
         String genre="";
@@ -237,14 +269,20 @@ public class ScrollingActivity extends AppCompatActivity implements
     }
 
     // Returns all the available songs with provided genre
-    public List<Song> getGenreSongs(Activity activity, String genre) {
+    public List<Song> getGenreSongs(Activity activity, String genre, boolean include) {
         List<Song> filteredSongs = new ArrayList<Song>();
 
         try {
             List<Song> allSongs = getSongsFromAnXML(this);
             for(Song song : allSongs) {
-                if(song.genre.equals(genre)) {
-                    filteredSongs.add(song);
+                if(include) {
+                    if (song.genre.equals(genre)) {
+                        filteredSongs.add(song);
+                    }
+                } else {
+                    if (!song.genre.equals(genre)) {
+                        filteredSongs.add(song);
+                    }
                 }
             }
         } catch (XmlPullParserException e) {
@@ -291,8 +329,9 @@ public class ScrollingActivity extends AppCompatActivity implements
     }
 
     // Adds all the songs present in xml/songs.xml to the table
-    private void populateSongList() {
+    public void populateSongList(String genre) {
         TableLayout songsTbl = (TableLayout) findViewById(R.id.song_list);
+        songsTbl.removeAllViews();
         int textColor = Color.BLACK;
         float textSize = 16;
         try {
@@ -342,8 +381,13 @@ public class ScrollingActivity extends AppCompatActivity implements
             tbrow.setBackgroundResource(R.color.common_plus_signin_btn_text_dark_disabled);
 
             songsTbl.addView(tbrow);
+            songs = getSongsFromAnXML(this);     // Default playlist
 
-            List<Song> songs = getSongsFromAnXML(this);
+            if(genre != null && !genre.equals("")) {
+                songs = getGenreSongs(this, genre, true);    //Including genre
+                songs.addAll(getGenreSongs(this, genre, false));        // Exluding genre
+            }
+
             for(Song song: songs) {
                 tbrow = new TableRow(this);
                 tbrow.setPadding(0, 70, 0, 70);
@@ -396,10 +440,8 @@ public class ScrollingActivity extends AppCompatActivity implements
 
             }
         } catch (XmlPullParserException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
