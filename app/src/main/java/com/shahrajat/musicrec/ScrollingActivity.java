@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -18,6 +20,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -38,6 +42,7 @@ import android.widget.FrameLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -60,6 +65,7 @@ import java.util.concurrent.ExecutionException;
 
 import static android.R.attr.resource;
 import static com.shahrajat.musicrec.ActivityRecognizedService.mActivityView;
+import com.shahrajat.musicrecmiddleware.*;
 
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -70,6 +76,8 @@ public class ScrollingActivity extends AppCompatActivity implements
     public static final String MY_PREFS_NAME = "MyPrefsFile";
     List<Song> songs;
     MyReceiver myReceiver;
+    protected ServiceConnection addServiceConnection, contextServiceConnection;
+    protected IContextInterface contextService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,8 +127,43 @@ public class ScrollingActivity extends AppCompatActivity implements
         editor.putString("relaxing", "Pop");
         editor.putString("working", "Rap");
         editor.commit();
+    }
 
-        // Default playlist for relaxing
+        /*
+     * Initialize connection with the service. Implement all Callback methods
+     */
+    void initConnection() {
+
+        contextServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                contextService = IContextInterface.Stub.asInterface(service);
+                Toast.makeText(getApplicationContext(),
+                        "Context Service Connected", Toast.LENGTH_SHORT)
+                        .show();
+                Log.d("IApp", "Binding is done - Context Service connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                // TODO Auto-generated method stub
+                contextService = null;
+                Toast.makeText(getApplicationContext(), "Service Disconnected",
+                        Toast.LENGTH_SHORT).show();
+                Log.d("IRemote", "Binding - Location Service disconnected");
+            }
+        };
+        if (contextService == null) {
+            Intent contextIntent = new Intent();
+            contextIntent.setPackage("com.shahrajat.musicrecmiddleware");
+            contextIntent.setAction("service.contextFinder");
+            bindService(contextIntent, contextServiceConnection, Context.BIND_AUTO_CREATE);
+            //mContextIsBound = true;
+            if(contextService==null)
+                Log.d("locService","NULL");
+        }
+
+    // Default playlist for relaxing
         populateSongList("relaxing");
     }
 
@@ -172,6 +215,10 @@ public class ScrollingActivity extends AppCompatActivity implements
         if(myReceiver!=null) {
             unregisterReceiver(myReceiver);
         }
+        if(addServiceConnection != null)
+            unbindService(addServiceConnection);
+        if(contextServiceConnection != null)
+            unbindService(contextServiceConnection);
     }
 
     // Activity recognition service

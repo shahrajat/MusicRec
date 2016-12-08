@@ -95,10 +95,12 @@ public class ActivityRecognizedService extends IntentService {
                     case DetectedActivity.IN_VEHICLE:
                         toDisplay = "Driving: " + prefs.getString("driving", "No pref");
                         mActivityView.setText(toDisplay);
+                        reorderPlayList("driving");
                         break;
                     case DetectedActivity.RUNNING:
                         toDisplay = "Jogging: " + prefs.getString("running", "No pref");
                         mActivityView.setText(toDisplay);
+                        reorderPlayList("jogging");
                         break;
                     case DetectedActivity.STILL:
                         toDisplay = "Relaxing: " + prefs.getString("relaxing", "No pref");
@@ -108,6 +110,7 @@ public class ActivityRecognizedService extends IntentService {
                     case DetectedActivity.TILTING:
                         toDisplay = "WorkingOut: " + prefs.getString("working", "No pref");
                         mActivityView.setText(toDisplay);
+                        reorderPlayList("working");
                         break;
                     case DetectedActivity.UNKNOWN:
                         toDisplay = "Unknown: " + prefs.getString("random", "Random");
