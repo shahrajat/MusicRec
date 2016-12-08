@@ -39,15 +39,20 @@ In order to run the application locally, download the source code and import it 
 
  Update 11/13/2016: For higher accuracy of activity detection, Android Activity Recognition API is used.
 
-## TODO
-   1. (Finished) Parse [raw XML](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) having songs metadata and dynamically populate the UI element.
-   2. (Finished) Use Android Location API to detect current location of the user.
-   3. (Finished) Find accelerometer reading using phone sensors.
-   4. (Finished) Update exisiting user genre preference whenever user manually selects a song.
-   5. (Finished) Store user history in a persistent storage.
-   6. (Finished) Identify user activity based on above factors.
-   7. (Finished) Dynamically update playlist based on best guess of current activity.
-   8. (Finished) Separate middleware from the foreground app.
+### Features implemented in Foreground App
+   1. Parse [raw XML](https://raw.githubusercontent.com/shahrajat/MusicRec/master/app/src/main/res/xml/songs.xml) having songs metadata and dynamically populate the UI element.
+   2. Use Android Location API to detect current location of the user.
+   3. Find accelerometer reading using phone sensors.
+   4. Update exisiting user genre preference whenever user manually selects a song.
+   5. Store user history in a persistent storage.
+   6. Identify user activity based on above factors.
+   7. Dynamically update playlist based on best guess of current activity.
+   8. Separate middleware from the foreground app.
+
+### Features implemented in Background App
+   1. Detect current user activity in service.
+   2. API method for interaction with foreground app.
+   3. API method returns string for current user activity as ecpected by it.
 
 ## Application Flow and internal details
    1. When the application is launched, default order of the songs is displayed.
