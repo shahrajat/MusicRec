@@ -18,7 +18,12 @@ Dependencies and External Libraries:
 - Google Play Services: 9.0.2
 - Android Kitat: 4.4
 
-In order to run the application locally, download the source code and import it in Android Studio. Then Compile and run it either in an emulator or export it as an APK to Android device.
+In order to run the application locally, download the source code and import it in Android Studio. Then first Compile and run the middleware as shown in the [screenshot](http://shahrajat.com/img/musicrec-android-studio.png) either in an emulator or export it as an APK to Android device. Then run the app in a similar fashion.
+
+
+### Screenshots
+- Following screenshot shows android studio setup after cloning this repository: http://shahrajat.com/img/musicrec-android-studio.png
+
 
 ## Implemented Approach
 - Activity Recognition
@@ -42,6 +47,7 @@ In order to run the application locally, download the source code and import it 
    5. (Finished) Store user history in a persistent storage.
    6. (Finished) Identify user activity based on above factors.
    7. (Finished) Dynamically update playlist based on best guess of current activity.
+   8. (Finished) Separate middleware from the foreground app.
 
 ## Application Flow and internal details
    1. When the application is launched, default order of the songs is displayed.
