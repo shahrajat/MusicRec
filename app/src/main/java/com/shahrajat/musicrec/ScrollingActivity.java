@@ -65,7 +65,7 @@ import java.util.concurrent.ExecutionException;
 
 import static android.R.attr.resource;
 import static com.shahrajat.musicrec.ActivityRecognizedService.mActivityView;
-import com.shahrajat.musicrecmiddleware.*;
+import com.shahrajat.musicrecmiddleware.*;  // all classes from Middleware
 
 public class ScrollingActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -178,9 +178,7 @@ public class ScrollingActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -221,7 +219,6 @@ public class ScrollingActivity extends AppCompatActivity implements
             unbindService(contextServiceConnection);
     }
 
-    // Activity recognition service
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         try {

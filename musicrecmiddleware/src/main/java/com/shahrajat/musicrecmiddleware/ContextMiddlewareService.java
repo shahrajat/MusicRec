@@ -21,6 +21,9 @@ import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
+/*
+Service which runs as middleware for interaction with foreground apps
+ */
 public class ContextMiddlewareService extends Service implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private GoogleApiClient mGoogleApiClient;
@@ -68,12 +71,9 @@ public class ContextMiddlewareService extends Service implements
     }
 
     private final IContextInterface.Stub mBinder = new IContextInterface.Stub() {
-
         /*
         Returns the string for current activity of the user
          */
-
-
         public String getUserActivity() {
             String activity = "";
 
@@ -96,7 +96,5 @@ public class ContextMiddlewareService extends Service implements
             }
             return activity;
         }
-
     };
-
 }
