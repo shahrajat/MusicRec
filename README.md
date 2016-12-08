@@ -59,6 +59,9 @@ In order to run the application locally, download the source code and import it 
 ## Sample Screenshots
 <p align="center">
 <kbd>
+<img src="https://media.giphy.com/media/3o7TKLfkvWpX3PPWQ8/giphy.gif" border="3"/>
+ </kbd>
+<kbd>
   <img src="https://media.giphy.com/media/3o6Ztr0zyb96WVvVMA/giphy.gif" border="3"/>
  </kbd>
 </p>
